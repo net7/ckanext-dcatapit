@@ -189,11 +189,23 @@ class DCATAPITCSWHarvester(CSWHarvester, SingletonPlugin):
         package_dict['extras'].append({'key': 'modified', 'value': revision_date})
 
         #  -- frequency -- #
+        # Normalizza il valore della frequenza (rimuove spazi, gestisce diversi formati)
+        frequency_value = iso_values.get('frequency-of-update', '').strip() if iso_values.get('frequency-of-update') else None
+        mapped_frequency = None
+        if frequency_value:
+            # Prova prima con il valore originale
+            mapped_frequency = mapping_frequencies_to_mdr_vocabulary.get(frequency_value)
+            # Se non trovato, prova con il valore in lowercase
+            if not mapped_frequency:
+                mapped_frequency = mapping_frequencies_to_mdr_vocabulary.get(frequency_value.lower())
+            # Se non trovato, prova con il valore in UPPERCASE
+            if not mapped_frequency:
+                mapped_frequency = mapping_frequencies_to_mdr_vocabulary.get(frequency_value.upper())
+        
         package_dict['extras'].append({
             'key': 'frequency',
-            'value': mapping_frequencies_to_mdr_vocabulary.get(
-                iso_values['frequency-of-update'],
-                dcatapit_config.get('frequency', self.DEFAULT_CONFIG.get('frequency')))})
+            'value': mapped_frequency or dcatapit_config.get('frequency', self.DEFAULT_CONFIG.get('frequency'))
+        })
 
         #  -- rights_holder -- #
         agent_name, agent_code = utils.get_responsible_party(
