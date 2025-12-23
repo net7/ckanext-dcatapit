@@ -253,7 +253,6 @@ class DCATAPITPackagePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm,
             'get_localized_subtheme': helpers.get_localized_subtheme,
             'dcatapit_enable_form_tabs': helpers.get_enable_form_tabs,
             'dcatapit_get_icustomschema_fields': helpers.get_icustomschema_fields,
-            'get_frequency_url': helpers.get_frequency_url,
         }
 
         if MLR:
