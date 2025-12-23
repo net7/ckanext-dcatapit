@@ -2,7 +2,7 @@
 
 import json
 
-from ckanext.dcatapit.harvesters.utils import map_ckan_license
+from ckanext.dcatapit.harvesters.utils import map_ckan_license, map_ckan_frequency
 from ckanext.dcatapit.mapping import map_nonconformant_groups
 from ckanext.harvest.harvesters.ckanharvester import CKANHarvester
 
@@ -20,5 +20,6 @@ class CKANMappingHarvester(CKANHarvester):
     def import_stage(self, harvest_object):
         map_nonconformant_groups(harvest_object)
         data = map_ckan_license(harvest_object=harvest_object)
+        data = map_ckan_frequency(pkg_dict=data)
         harvest_object.content = json.dumps(data)
         return super(CKANMappingHarvester, self).import_stage(harvest_object)

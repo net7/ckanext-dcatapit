@@ -244,3 +244,60 @@ def map_ckan_license(harvest_object=None, pkg_dict=None):
         else:
             res['license_type'] = dataset_license.uri
     return data
+
+
+def map_ckan_frequency(harvest_object=None, pkg_dict=None):
+    """
+    Mappa i valori di frequency e accrualPeriod al vocabolario MDR
+    :param harvest_object:
+    :param pkg_dict:
+    :type harvest_object: HarvestObject model
+    :type pkg_dict: dict dictized dataset
+
+    :return: This will return dataset's dict with mapped frequency
+    :rtype: dict with dictized dataset
+    """
+    if not (harvest_object or pkg_dict) or (harvest_object and pkg_dict):
+        raise ValueError('You should provide either harvest_object or pkg_dict')
+
+    if harvest_object:
+        data = json.loads(harvest_object.content)
+    else:
+        data = pkg_dict
+
+    # Mappa frequency negli extras
+    extras = data.get('extras', [])
+    for extra in extras:
+        if extra.get('key') in ['frequency', 'accrualPeriod']:
+            frequency_value = extra.get('value', '').strip() if extra.get('value') else None
+            if frequency_value:
+                mapped_frequency = _mapping_frequencies_to_mdr_vocabulary.get(frequency_value)
+                if not mapped_frequency:
+                    mapped_frequency = _mapping_frequencies_to_mdr_vocabulary.get(frequency_value.lower())
+                if not mapped_frequency:
+                    mapped_frequency = _mapping_frequencies_to_mdr_vocabulary.get(frequency_value.upper())
+                
+                if mapped_frequency:
+                    extra['value'] = mapped_frequency
+                    log.info(f"Mapped {extra.get('key')} from '{frequency_value}' to '{mapped_frequency}'")
+                else:
+                    log.warning(f"Could not map {extra.get('key')} value: '{frequency_value}'")
+
+    # Mappa anche se frequency è nel dict principale (non solo negli extras)
+    for field in ['frequency', 'accrualPeriod']:
+        if field in data:
+            frequency_value = data[field]
+            if frequency_value:
+                mapped_frequency = _mapping_frequencies_to_mdr_vocabulary.get(frequency_value)
+                if not mapped_frequency:
+                    mapped_frequency = _mapping_frequencies_to_mdr_vocabulary.get(frequency_value.lower())
+                if not mapped_frequency:
+                    mapped_frequency = _mapping_frequencies_to_mdr_vocabulary.get(frequency_value.upper())
+                
+                if mapped_frequency:
+                    data[field] = mapped_frequency
+                    log.info(f"Mapped {field} from '{frequency_value}' to '{mapped_frequency}'")
+                else:
+                    log.warning(f"Could not map {field} value: '{frequency_value}'")
+
+    return data
