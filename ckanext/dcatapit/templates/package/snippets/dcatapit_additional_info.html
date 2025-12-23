@@ -205,13 +205,8 @@
 								<div class="rtds-grid lg:rtds-grid-cols-12">
 									<dt class="rtds-col-span-3">{{ field.label }}</dt>
 									{% if field.name == 'frequency' %}
-										{% set frequency_url = h.get_frequency_url(pkg_dict[field.name]) %}
 										<dd class="rtds-col-span-9 rtds-content-03 rtds-truncate">
-											{% if frequency_url %}
-												<a href="{{ frequency_url }}" target="_blank" rel="noopener noreferrer">{{ frequency_url }}</a>
-											{% else %}
-												{{ h.list_to_string(value_field, field.format) or field.default or _('N/D') }}
-											{% endif %}
+											{{ ', '.join(value_field) if value_field is iterable and value_field is not string else value_field }}
 										</dd>
 									{% else %}
 										<dd class="rtds-col-span-9 rtds-content-03 rtds-truncate">{{ h.list_to_string(value_field, field.format) or field.default or _('N/D') }}</dd>
