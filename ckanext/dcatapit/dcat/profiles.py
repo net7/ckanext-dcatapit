@@ -889,7 +889,7 @@ class ItalianDCATAPProfile(RDFProfile):
 
         landing_page_url=""
         # replace landing page
-        if 'cciaan' in dataset_dict.get('holder_identifier'):
+        if 'cciaan' in (dataset_dict.get('holder_identifier') or ''):
           landing_page_uri = dataset_dict.get('url')
           landing_page_url = dataset_dict.get('url')
           # landing_page_uri = 'https://opendata.marche.camcom.it'
