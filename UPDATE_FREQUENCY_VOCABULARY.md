@@ -148,3 +148,16 @@ SELECT COUNT(*) FROM tag WHERE vocabulary_id = '821715b0-e88a-46d0-9a76-4e01ca35
 - `UPDATE_CONT` - Continuously updated
 - `NOT_PLANNED` - Not planned
 
+## P.s. ulteriori query da effettuare:
+
+```sql
+INSERT INTO dcatapit_vocabulary (tag_id, tag_name, lang, text)
+VALUES ('8535f110-4de2-40cf-a486-626f2c5d1389','AS_NEEDED','it','secondo necessità')
+VALUES ('3b73e3fa-c395-4a88-a150-08c6fb96f082','NOT_PLANNED','it','non pianificato');
+```
+
+```sql
+INSERT INTO tag_multilang(tag_id, tag_name, lang, text)
+VALUES ('8535f110-4de2-40cf-a486-626f2c5d1389','AS_NEEDED','it',secondo necessità')
+VALUES ('3b73e3fa-c395-4a88-a150-08c6fb96f082','NOT_PLANNED','it','non pianificato');
+```
