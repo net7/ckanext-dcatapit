@@ -6,4 +6,52 @@
 	{% snippet 'snippets/dcatapit_form_fields.html', data=data, errors=errors, schema_fields=org_fields %}
 
     {% if action == "new" or action == "edit" %}{{ super() }}{% endif %}
+
+    <script>
+    (function() {
+      // Auto-populate url field based on name for organization
+      var nameField = document.getElementById('field-name');
+      var urlField = document.getElementById('field-url');
+
+      if (nameField && urlField) {
+        nameField.addEventListener('input', function() {
+          // Solo se il campo url è vuoto o non è stato modificato manualmente
+          if (!urlField.dataset.manuallyEdited) {
+            var slug = nameField.value
+              .toLowerCase()
+              .trim()
+              .replace(/[àáâãäå]/g, 'a')
+              .replace(/[èéêë]/g, 'e')
+              .replace(/[ìíîï]/g, 'i')
+              .replace(/[òóôõö]/g, 'o')
+              .replace(/[ùúûü]/g, 'u')
+              .replace(/[ñ]/g, 'n')
+              .replace(/[ç]/g, 'c')
+              .replace(/[^\w\s-]/g, '') // Rimuove caratteri speciali
+              .replace(/\s+/g, '-')      // Sostituisce spazi con trattini
+              .replace(/-+/g, '-')       // Rimuove trattini multipli
+              .replace(/^-+|-+$/g, '');  // Rimuove trattini all'inizio e alla fine
+            
+            urlField.value = slug;
+            
+            // Trigger event
+            var event = new Event('input', { bubbles: true });
+            urlField.dispatchEvent(event);
+          }
+        });
+        
+        // Marca il campo come modificato manualmente se l'utente ci scrive dentro
+        urlField.addEventListener('keydown', function() {
+          urlField.dataset.manuallyEdited = 'true';
+        });
+        
+        // Resetta il flag se il campo viene svuotato
+        urlField.addEventListener('input', function() {
+          if (urlField.value === '') {
+            delete urlField.dataset.manuallyEdited;
+          }
+        });
+      }
+    })();
+    </script>
 {% endblock %}
