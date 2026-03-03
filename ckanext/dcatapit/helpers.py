@@ -360,6 +360,33 @@ def get_org_context():
     return DEFAULT_ORG_CTX.copy()
 
 
+def get_organization_name_and_identifier(org_id):
+    """
+    Given an organization ID, return a dict with 'name' (title) and 'identifier' (IPA/IVA).
+    Returns empty strings if org not found.
+    """
+    if not org_id:
+        return {'name': '', 'identifier': ''}
+    try:
+        ctx = get_org_context()
+        ctx['for_view'] = True
+        org = toolkit.get_action('organization_show')(ctx, {
+            'id': org_id,
+            'include_tags': False,
+            'include_users': False,
+            'include_groups': False,
+            'include_extras': True,
+            'include_followers': False,
+            'include_datasets': False,
+        })
+        return {
+            'name': org.get('title', ''),
+            'identifier': org.get('identifier', ''),
+        }
+    except Exception:
+        return {'name': '', 'identifier': ''}
+
+
 def get_icustomschema_fields():
     out = []
     for plugin in PluginImplementations(interfaces.ICustomSchema):

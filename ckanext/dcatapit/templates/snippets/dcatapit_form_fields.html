@@ -81,12 +81,17 @@
 
             {% elif field.element == 'vocabulary' or field.element == 'region' %}
                   {% set options = h.get_vocabulary_items(field.vocabulary_name) if field.type == 'vocabulary' else field.options %}
+                  {% if field.name == 'language' %}
+                      {% set field_value = data[field.name] or 'http://publications.europa.eu/resource/authority/language/ITA' %}
+                  {% else %}
+                      {% set field_value = data[field.name] %}
+                  {% endif %}
                   {{
                         dform.vocabulary(
                               field.name,
                               id='field-' + field.name,
                               label=field.label,
-                              value=data[field.name],
+                              value=field_value,
                               placeholder=field.placeholder,
                               error=errors[field.name],
                               options=options,
@@ -99,6 +104,9 @@
                   {% if (not data.get('owner_org') and not data.get(field.name) and 'dataset_is_local' not in data) %}
                         {{ dform.rights_holder_create(field.name, label=field.label, help=field.help_create) }}
                   {% else %}
+                        {% set org_info = h.get_organization_name_and_identifier(data.get('owner_org') or data.get('group_id')) %}
+                        {% set val0 = data[field.couples[0].name] or org_info['name'] %}
+                        {% set val1 = data[field.couples[1].name] or org_info['identifier'] %}
                         {{
                             dform.couple(
                               field.name,
@@ -108,7 +116,7 @@
                               label=field.label,
                               read_only=(field.read_only or False),
                               modify_fields=not data.get('dataset_is_local'),
-                              values=(data[field.couples[0].name], data[field.couples[1].name], False),
+                              values=(val0, val1, False),
                               error=errors[field.couples[0].name] or errors[field.couples[1].name],
                               types=(field.couples[0].type, field.couples[1].type),
                               is_required=field.is_required,
@@ -135,6 +143,14 @@
                   }}
 
                   ------------------------------------------------------------------------------- #}
+                  {% if field.name == 'publisher' %}
+                      {% set org_info = h.get_organization_name_and_identifier(data.get('owner_org') or data.get('group_id')) %}
+                      {% set val0 = data[field.couples[0].name] or org_info['name'] %}
+                      {% set val1 = data[field.couples[1].name] or org_info['identifier'] %}
+                  {% else %}
+                      {% set val0 = data[field.couples[0].name] %}
+                      {% set val1 = data[field.couples[1].name] %}
+                  {% endif %}
                   {{
                         dform.couple(
                               field.name,
@@ -143,7 +159,7 @@
                               id='field-range-' + field.name,
                               label=field.label,
                               read_only=(field.read_only or False),
-                              values=(data[field.couples[0].name], data[field.couples[1].name], False),
+                              values=(val0, val1, False),
                               error=errors[field.couples[0].name] or errors[field.couples[1].name],
                               types=(field.couples[0].type, field.couples[1].type),
                               is_required=field.is_required,
@@ -223,7 +239,7 @@
                    {{ dform.geonames(name=field.name,
                                                     label=field.label,
                                                     id='field-'+field.name,
-                                                    value=data[field.name],
+                                                    value=data[field.name] or 'http://www.geonames.org/3165361',
                                                     error=errors[field.name],
                                                     lang=h.lang(),
                                                     username=config.username,
