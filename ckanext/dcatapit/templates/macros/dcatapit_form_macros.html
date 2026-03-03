@@ -1,6 +1,6 @@
 {% import 'macros/form.html' as form %}
 
-{% macro input(name, id='', label='', value='', placeholder='', type='text', error="", classes=[], attrs={}, is_required=false, help='') %}
+{% macro input(name, id='', label='', value='', placeholder='', type='text', error="", classes=[], attrs={}, is_required=false, help='', autocomplete='') %}
     {%- set extra_html = caller() if caller -%}
 
     {% call input_block(id or name, label or name, error, classes, extra_html=extra_html, is_required=is_required) %}
@@ -10,6 +10,7 @@
                value="{{ value | empty_and_escape }}"
                class="form-control"
                placeholder="{{ placeholder }}"
+               autocomplete="{{ autocomplete }}"
                {{ attributes(attrs) }} />
         {{ help_block(help) }}
 
