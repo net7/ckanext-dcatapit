@@ -3,3 +3,9 @@
 *.pyo
 __pycache__/
 *.py[cod]
+
+ckanext/dcatapit/__pycache__/*
+ckanext/dcatapit/commands/__pycache__/*
+ckanext/dcatapit/controllers/__pycache__/*
+ckanext/dcatapit/dcat/__pycache__/*
+ckanext/dcatapit/model/__pycache__/*

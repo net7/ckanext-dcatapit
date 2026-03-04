@@ -203,9 +203,11 @@ body .ui-tooltip {
 }
 .ui-tabs .ui-tabs-panel {
 	display: block;
-	border-width: 0;
-	padding: 1em 1.4em;
-	background: none;
+	border: 1px solid #dde3e6;
+	border-radius: 4px;
+	padding: 1.5em 1.8em 1em;
+	margin-bottom: 1em;
+	background: #fdfdfd;
 }
 
 ul.ui-tabs-nav {
@@ -215,28 +217,70 @@ ul.ui-tabs-nav {
 
 .hovered {
     background-color: #8ca0a6;
+    border-radius: 3px;
 }
 
 .form-nav {
-    padding: 6pt;
+    padding: 12px 0 4px;
+    margin-top: 20px;
+    border-top: 1px solid #dde3e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    clear: both;
 }
 
+.form-nav::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.form-nav-item {
+    border: 1px solid #8ca0a6;
+    border-radius: 4px;
+    background: #fff;
+    padding: 0;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.form-nav-item:hover {
+    background-color: #8ca0a6;
+    border-color: #5a7a84;
+}
+
+.form-nav-item:hover a {
+    color: #fff;
+}
+
+.form-nav-item a {
+    display: inline-block;
+    padding: 6px 16px;
+    text-decoration: none;
+    color: #495057;
+    font-size: 13px;
+}
 
 .prev-item {
-    float: left;
+    float: none;
+    margin-right: auto;
+}
+
+.prev-item a::before {
+    content: "\2190\00a0";
 }
 
 .next-item {
-    float: right;
+    float: none;
+    margin-left: auto;
+}
+
+.next-item a::after {
+    content: "\00a0\2192";
 }
 
 .with-error a {
     color: #b55457;
-
-}
-
-.form-nav-item a {
-    text-decoration: none;
 }
 
 
@@ -248,6 +292,44 @@ ul.ui-tabs-nav {
 	font-weight: normal;
 	color: #454545;
 }
+
+#tabs-container .nav-item {
+	border-bottom: 1px solid #e8ecee;
+	margin: 0;
+	transition: background-color 0.15s ease;
+}
+#tabs-container .nav-item:last-child {
+	border-bottom: none;
+}
+#tabs-container .nav-item a {
+	display: block;
+	padding: 10px 14px;
+	color: #495057;
+	text-decoration: none;
+	font-size: 13px;
+	line-height: 1.4;
+	border-left: 3px solid transparent;
+}
+#tabs-container .nav-item a:hover {
+	background-color: #f0f4f5;
+	color: #2b2b2b;
+}
+#tabs-container .nav-item.hovered a,
+#tabs-container .nav-item.ui-state-active a {
+	background-color: #8ca0a6;
+	color: #fff;
+	border-left-color: #5a7a84;
+	font-weight: 600;
+}
+#tabs-container .nav-item.with-error a {
+	color: #b55457;
+	border-left-color: #b55457;
+}
+#tabs-container .nav-item.with-error.hovered a {
+	background-color: #c96b6e;
+	color: #fff;
+}
+
 .module-tabs .ui-state-default a,
 .module-tabs .ui-state-default a:link,
 .module-tabs .ui-state-default a:visited {
@@ -274,10 +356,10 @@ ul.ui-tabs-nav {
 	font-weight: normal;
 	color: #ffffff;
 	background-color: #8ca0a6;
+	border-radius: 3px;
 }
 
 .module-tabs .ui-state-active a:before{
-
     content: ' ';
     position: absolute;
     top: 0;
@@ -290,7 +372,7 @@ ul.ui-tabs-nav {
 .module-tabs .ui-state-active a,
 .module-tabs .ui-state-active a:link,
 .module-tabs .ui-state-active a:visited {
-	color: #333;
+	color: #fff;
 	text-decoration: none;
 	background-color: #8ca0a6;
 }
@@ -304,7 +386,7 @@ ul.ui-tabs-nav {
 .module-tabs .ui-widget-header .ui-state-focus {
 	font-weight: normal;
 	color: #2b2b2b;
-	background-color: #eee;
+	background-color: #f0f4f5;
 }
 
 /* Interaction Cues
@@ -616,4 +698,122 @@ ul.ui-tabs-nav {
 .select2-search-choice-close,
 .select2-container-multi .select2-search-choice-close {
   top: 4px!important;
+}
+
+/* =====================================================
+   Dataset edit form – visual improvements
+   ===================================================== */
+
+/* Tab panel: consistent field spacing */
+.ui-tabs-panel > .form-group,
+.ui-tabs-panel > .control-group {
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #eef1f3;
+}
+.ui-tabs-panel > .form-group:last-of-type,
+.ui-tabs-panel > .control-group:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+/* Labels within panels */
+.ui-tabs-panel .form-label,
+.ui-tabs-panel .control-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+/* Module-tabs container – rounded box */
+.module-tabs.module-narrow {
+    border: 1px solid #dde3e6;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+}
+.module-tabs.module-narrow > div {
+    padding: 0;
+}
+
+/* Make the forms-container fill the space properly */
+.forms-container {
+    min-height: 300px;
+}
+
+/* Hide panels that jQuery UI hides – reinforcement */
+.ui-tabs-panel[aria-hidden="true"] {
+    display: none !important;
+}
+
+/* Error-explanation banner – improved */
+.error-explanation.alert {
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+
+/* Related datasets section styling within panels */
+.ui-tabs-panel .related-datasets-wrap {
+    padding: 12px 0 0;
+}
+
+/* Wrapper sections with clear headings */
+.ui-tabs-panel .theme-wrap,
+.ui-tabs-panel .creator-wrap,
+.ui-tabs-panel .temporal-coverage-wrap,
+.ui-tabs-panel .conforms-to-wrap,
+.ui-tabs-panel .alternate-identifier-wrap {
+    padding: 12px 0;
+}
+
+/* Stages (step bar) above tab form – spacing */
+#dataset-edit ol.stages {
+    margin-bottom: 20px;
+}
+
+/* Compact select fields */
+.ui-tabs-panel select.form-control {
+    max-width: 100%;
+}
+
+/* Section titles */
+.dcatapit-section-title {
+    border-bottom: 2px solid #8ca0a6;
+    margin: 24px 0 16px;
+    padding-bottom: 10px;
+}
+.dcatapit-section-title:first-child {
+    margin-top: 0;
+}
+.dcatapit-section-title h3 {
+    margin: 0 0 2px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #2c3e50;
+    letter-spacing: 0.02em;
+}
+.dcatapit-section-title p {
+    margin: 0;
+    font-size: 13px;
+    color: #6c7a89;
+}
+
+/* Base fields wrapper (fields outside tabs) */
+.base-fields-section {
+    border: 1px solid #dde3e6;
+    border-radius: 4px;
+    padding: 1.5em 1.8em 1em;
+    margin-bottom: 1em;
+    background: #fdfdfd;
+}
+.base-fields-section > .form-group,
+.base-fields-section > .control-group {
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #eef1f3;
+}
+.base-fields-section > .form-group:last-child,
+.base-fields-section > .control-group:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
 }

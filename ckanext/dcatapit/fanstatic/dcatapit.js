@@ -756,6 +756,26 @@ ckan.module('dcatapit-edit-form', function($){
             this.build_nav(tabs_list.find('li'), tabs_container.find('.ui-tabs-panel'));
             this.handle_errors(tabs_list.find('li'), tabs_container.find('.ui-tabs-panel'), container);
             container.prepend($('ol.stages'));
+
+            this.add_section_titles(tabs_container, container);
+        },
+
+        add_section_titles: function(tabs_container, container){
+            tabs_container.before(
+                $('<div class="dcatapit-section-title">' +
+                  '<h3>Metadati DCAT-AP IT</h3>' +
+                  '<p>Compilare le sezioni utilizzando i tab nella barra laterale.</p>' +
+                  '</div>')
+            );
+
+            var leftover = tabs_container.nextAll('.form-group, .control-group');
+            if (leftover.length > 0) {
+                var wrapper = $('<div class="base-fields-section"></div>');
+                var heading = $('<div class="dcatapit-section-title"></div>');
+                leftover.first().before(heading);
+                heading.after(wrapper);
+                wrapper.append(leftover);
+            }
         },
 
         handle_errors: function(tabs, panels, main_c){
