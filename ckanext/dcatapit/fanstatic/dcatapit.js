@@ -510,7 +510,7 @@ ckan.module('geonames', function($){
             // this.store.attr('type', 'hidden');
             //this.display.removeClass('hidden');
             $(this.el).attr('readonly', false);
-            this.store.change(function(evt){
+            this.store.on('change input', function(evt){
                                 that.on_url_change(evt)});
 
         },
@@ -536,9 +536,9 @@ ckan.module('geonames', function($){
                 return null;
             }
             var id = null;
-            if (val.startsWith('http://geonames.org/') || val.startsWith('https://geonames.org/')){
+            if (val.startsWith('http://geonames.org/') || val.startsWith('https://geonames.org/') || val.startsWith('http://www.geonames.org/') || val.startsWith('https://www.geonames.org/')){
                 id = val.split('/')[3];
-            } else if (val.startsWith('geonames.org/')){
+            } else if (val.startsWith('geonames.org/') || val.startsWith('www.geonames.org/')){
                 id = val.split('/')[1];
             } else {
                 id = val;

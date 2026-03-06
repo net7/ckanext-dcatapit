@@ -239,13 +239,14 @@
                    {{ dform.geonames(name=field.name,
                                                     label=field.label,
                                                     id='field-'+field.name,
-                                                    value=data[field.name] or 'http://www.geonames.org/3165361',
+                                                    value=data[field.name] or 'https://www.geonames.org/3165361/toscana.html',
                                                     error=errors[field.name],
                                                     lang=h.lang(),
                                                     username=config.username,
                                                     limit_to=config.limit_to,
                                                     placeholder_name=field.placeholder_name,
                                                     placeholder_url=field.placeholder_url,
+                                                    value_name='Toscana' if not data[field.name] else '',
                                                     help=field.help) }}
 
 

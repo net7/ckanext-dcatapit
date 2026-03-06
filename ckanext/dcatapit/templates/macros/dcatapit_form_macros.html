@@ -403,6 +403,7 @@ Old implementation of the couple element (one element with comma separated value
 {% macro geonames(name, label, id, value, error, lang, username, limit_to,
                   placeholder_name='',
                   placeholder_url='',
+                  value_name='',
                   classes=[],
                   attrs={},
                   help='') %}
@@ -412,7 +413,7 @@ Old implementation of the couple element (one element with comma separated value
         <div class="row">
             <div class="col-md-6">
                 <input type="text" id="{{ name }}-view" placeholder="{{ placeholder_name }}" class="form-control"
-               name="{{ name }}-view" {{ attributes(attrs) }}
+               name="{{ name }}-view" value="{{ value_name }}" {{ attributes(attrs) }}
                readonly
                data-module="geonames"
                data-module-geonames-username="{{ username }}"
