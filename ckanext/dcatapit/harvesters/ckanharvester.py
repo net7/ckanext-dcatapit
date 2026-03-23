@@ -53,6 +53,5 @@ class CKANMappingHarvester(CKANHarvester):
                         else:
                             Session.add(PackageExtra(package_id=pkg.id, key=key, value=value))
                     Session.flush()
-                    log.warning('DCATAPIT forced holder fields: %s', list(holder_fields.keys()))
 
         return result
