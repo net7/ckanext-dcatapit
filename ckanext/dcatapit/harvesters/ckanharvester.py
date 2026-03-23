@@ -24,11 +24,12 @@ class CKANMappingHarvester(CKANHarvester):
         map_nonconformant_groups(harvest_object)
         data = map_ckan_license(harvest_object=harvest_object)
         data = map_ckan_frequency(pkg_dict=data)
-        log.warning('DCATAPIT before map_top_level_to_extras: holder_identifier=%s extras_keys=%s',
-                  data.get('holder_identifier'),
-                  [e['key'] for e in data.get('extras', [])])
         data = map_top_level_to_extras(data)
-        log.warning('DCATAPIT after map_top_level_to_extras: extras_keys=%s',
-                  [e['key'] for e in data.get('extras', [])])
         harvest_object.content = json.dumps(data)
         return super(CKANMappingHarvester, self).import_stage(harvest_object)
+
+    def modify_package_dict(self, package_dict, harvest_object):
+        package_dict = super(CKANMappingHarvester, self).modify_package_dict(package_dict, harvest_object)
+        log.warning('DCATAPIT modify_package_dict extras_keys=%s',
+                    [e['key'] for e in package_dict.get('extras', [])])
+        return package_dict
