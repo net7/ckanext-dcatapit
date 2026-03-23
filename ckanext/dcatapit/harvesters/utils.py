@@ -246,6 +246,54 @@ def map_ckan_license(harvest_object=None, pkg_dict=None):
     return data
 
 
+DCATAPIT_TOPLEVEL_FIELDS = [
+    'holder_identifier',
+    'holder_name',
+    'holder',
+    'rightsHolder',
+    'identifier',
+    'alternate_identifier',
+    'frequency',
+    'publisher_name',
+    'publisher_identifier',
+    'geographical_name',
+    'geographical_geonames_url',
+    'language',
+    'creator',
+    'creator_name',
+    'creator_identifier',
+    'access_rights',
+    'conforms_to',
+    'temporal_coverage',
+    'theme',
+    'themes_aggregate',
+]
+
+
+def map_top_level_to_extras(pkg_dict):
+    """
+    Sposta i campi DCAT-AP_IT presenti come top-level nel package_dict
+    in extras, in modo che vengano salvati in package_extra da CKAN.
+    Non sovrascrive un extra già presente con lo stesso valore.
+    """
+    if 'extras' not in pkg_dict:
+        pkg_dict['extras'] = []
+
+    existing_keys = {e['key'] for e in pkg_dict['extras']}
+
+    for field in DCATAPIT_TOPLEVEL_FIELDS:
+        if field in pkg_dict and field not in existing_keys:
+            value = pkg_dict[field]
+            if value is not None and value != '':
+                if not isinstance(value, str):
+                    import json as _json
+                    value = _json.dumps(value)
+                pkg_dict['extras'].append({'key': field, 'value': value})
+                log.debug('Mapped top-level field %s to extras', field)
+
+    return pkg_dict
+
+
 def map_ckan_frequency(harvest_object=None, pkg_dict=None):
     """
     Mappa i valori di frequency e accrualPeriod al vocabolario MDR
