@@ -20,6 +20,11 @@ class CKANMappingHarvester(CKANHarvester):
             'form_config_interface': 'Text'
         }
 
+    # Campi che dcatapit gestisce tramite convert_to_extras (IDatasetForm schema).
+    # Devono stare come top-level nel pkg_dict, non dentro extras, altrimenti
+    # il validator CKAN li scarta perché la chiave è "riservata" dallo schema.
+    TOPLEVEL_FIELDS = ['holder_identifier', 'holder_name']
+
     def import_stage(self, harvest_object):
         map_nonconformant_groups(harvest_object)
         data = map_ckan_license(harvest_object=harvest_object)
@@ -30,6 +35,15 @@ class CKANMappingHarvester(CKANHarvester):
 
     def modify_package_dict(self, package_dict, harvest_object):
         package_dict = super(CKANMappingHarvester, self).modify_package_dict(package_dict, harvest_object)
-        log.warning('DCATAPIT modify_package_dict extras_keys=%s',
-                    [e['key'] for e in package_dict.get('extras', [])])
+        # Sposta holder_identifier e holder_name dagli extras al top-level
+        # così il validator convert_to_extras di dcatapit li processa correttamente.
+        extras_to_remove = []
+        for i, extra in enumerate(package_dict.get('extras', [])):
+            if extra['key'] in self.TOPLEVEL_FIELDS:
+                package_dict[extra['key']] = extra['value']
+                extras_to_remove.append(i)
+        for i in reversed(extras_to_remove):
+            package_dict['extras'].pop(i)
+        log.warning('DCATAPIT modify_package_dict v2: holder_identifier=%s holder_name=%s',
+                    package_dict.get('holder_identifier'), package_dict.get('holder_name'))
         return package_dict
