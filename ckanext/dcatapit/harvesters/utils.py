@@ -275,7 +275,6 @@ def map_top_level_to_extras(pkg_dict):
     Sposta i campi DCAT-AP_IT presenti come top-level nel package_dict
     in extras, in modo che vengano salvati in package_extra da CKAN.
     Non sovrascrive un extra già presente con lo stesso valore.
-    Rimuove sempre il campo top-level per evitare conflitti con lo schema CKAN.
     """
     if 'extras' not in pkg_dict:
         pkg_dict['extras'] = []
@@ -283,15 +282,14 @@ def map_top_level_to_extras(pkg_dict):
     existing_keys = {e['key'] for e in pkg_dict['extras']}
 
     for field in DCATAPIT_TOPLEVEL_FIELDS:
-        if field in pkg_dict:
-            value = pkg_dict.pop(field)
-            if field not in existing_keys:
-                if value is not None and value != '':
-                    if not isinstance(value, str):
-                        import json as _json
-                        value = _json.dumps(value)
-                    pkg_dict['extras'].append({'key': field, 'value': value})
-                    log.debug('Mapped top-level field %s to extras', field)
+        if field in pkg_dict and field not in existing_keys:
+            value = pkg_dict[field]
+            if value is not None and value != '':
+                if not isinstance(value, str):
+                    import json as _json
+                    value = _json.dumps(value)
+                pkg_dict['extras'].append({'key': field, 'value': value})
+                log.debug('Mapped top-level field %s to extras', field)
 
     return pkg_dict
 
