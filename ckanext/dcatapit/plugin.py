@@ -629,8 +629,6 @@ class DCATAPITPackagePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm,
         # remove holder info if pkg is local, use org as a source
         # see https://github.com/geosolutions-it/ckanext-dcatapit/pull/213#issuecomment-410668740
         pkg_dict['dataset_is_local'] = helpers.dataset_is_local(pkg_dict['id'])
-        log.warning('DCATAPIT dataset_is_local=%s holder_identifier=%s pkg_id=%s',
-                    pkg_dict['dataset_is_local'], pkg_dict.get('holder_identifier'), pkg_dict.get('id'))
         if pkg_dict['dataset_is_local']:
             pkg_dict.pop('holder_identifier', None)
             pkg_dict.pop('holder_name', None)

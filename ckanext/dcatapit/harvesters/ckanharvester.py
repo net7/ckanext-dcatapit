@@ -20,11 +20,6 @@ class CKANMappingHarvester(CKANHarvester):
             'form_config_interface': 'Text'
         }
 
-    # Campi che dcatapit gestisce tramite convert_to_extras (IDatasetForm schema).
-    # Devono stare come top-level nel pkg_dict, non dentro extras, altrimenti
-    # il validator CKAN li scarta perché la chiave è "riservata" dallo schema.
-    TOPLEVEL_FIELDS = ['holder_identifier', 'holder_name']
-
     def import_stage(self, harvest_object):
         map_nonconformant_groups(harvest_object)
         data = map_ckan_license(harvest_object=harvest_object)
@@ -33,17 +28,31 @@ class CKANMappingHarvester(CKANHarvester):
         harvest_object.content = json.dumps(data)
         return super(CKANMappingHarvester, self).import_stage(harvest_object)
 
-    def modify_package_dict(self, package_dict, harvest_object):
-        package_dict = super(CKANMappingHarvester, self).modify_package_dict(package_dict, harvest_object)
-        # Sposta holder_identifier e holder_name dagli extras al top-level
-        # così il validator convert_to_extras di dcatapit li processa correttamente.
-        extras_to_remove = []
-        for i, extra in enumerate(package_dict.get('extras', [])):
-            if extra['key'] in self.TOPLEVEL_FIELDS:
-                package_dict[extra['key']] = extra['value']
-                extras_to_remove.append(i)
-        for i in reversed(extras_to_remove):
-            package_dict['extras'].pop(i)
-        log.warning('DCATAPIT modify_package_dict v2: holder_identifier=%s holder_name=%s',
-                    package_dict.get('holder_identifier'), package_dict.get('holder_name'))
-        return package_dict
+    def _create_or_update_package(self, package_dict, harvest_object, package_dict_form='rest'):
+        # Il CKANHarvester base inietta uno schema default nel context che bypassa
+        # IDatasetForm di dcatapit. Chiamiamo super() e poi forziamo il salvataggio
+        # di holder_identifier e holder_name direttamente in package_extra.
+        from ckan.model import Session, PackageExtra, Package
+        result = super(CKANMappingHarvester, self)._create_or_update_package(
+            package_dict, harvest_object, package_dict_form)
+
+        if result and result is not False:
+            holder_fields = {}
+            for extra in package_dict.get('extras', []):
+                if extra['key'] in ('holder_identifier', 'holder_name'):
+                    holder_fields[extra['key']] = extra['value']
+
+            if holder_fields and harvest_object.package_id:
+                pkg = Session.query(Package).get(harvest_object.package_id)
+                if pkg:
+                    for key, value in holder_fields.items():
+                        existing = Session.query(PackageExtra).filter_by(
+                            package_id=pkg.id, key=key).first()
+                        if existing:
+                            existing.value = value
+                        else:
+                            Session.add(PackageExtra(package_id=pkg.id, key=key, value=value))
+                    Session.flush()
+                    log.warning('DCATAPIT forced holder fields: %s', list(holder_fields.keys()))
+
+        return result
