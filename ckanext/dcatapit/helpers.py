@@ -196,6 +196,10 @@ def couple_to_dict(field_couples, pkg_dict):
     return ret
 
 
+def today_as_string():
+    return datetime.datetime.now().strftime('%Y-%m-%d')
+
+
 def format(value, _format='%d-%m-%4Y', _type=None):
     # #################################################
     # TODO: manage here other formats if needed

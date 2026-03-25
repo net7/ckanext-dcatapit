@@ -5,12 +5,13 @@
 
             {% if field.element == 'input' %}
                   {% set input_attrs = field.attrs or {} %}
+                  {% set field_default_value = h.today_as_string() if (field.name in ('modified', 'issued') and not data[field.name]) else '' %}
                   {{ dform.input(field.name,
                                  label=field.label,
                                  id='field-' + field.name,
                                  placeholder=field.placeholder,
                                  type=field.type,
-                                 value=h.format((data[field.name] or ''), '%Y-%m-%d', field.type),
+                                 value=h.format((data[field.name] or field_default_value), '%Y-%m-%d', field.type),
                                  error=errors[field.name],
                                  classes=['control-medium'],
                                  is_required=field.is_required,
