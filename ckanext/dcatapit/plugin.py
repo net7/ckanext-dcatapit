@@ -99,7 +99,7 @@ class DCATAPITPackagePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm,
             else:
                 self._update_schema_field(schema, field)
 
-        schema['notes'] = [toolkit.get_validator('not_empty')]
+        schema['notes'] = [toolkit.get_validator('ignore_missing')]
 
         # ignore theme extra fields
         junk = schema.get('__junk', [])
@@ -165,7 +165,7 @@ class DCATAPITPackagePlugin(plugins.SingletonPlugin, toolkit.DefaultDatasetForm,
 
         schema.update({
             'notes': [
-                toolkit.get_validator('not_empty')
+                toolkit.get_validator('ignore_missing')
             ]
         })
 
