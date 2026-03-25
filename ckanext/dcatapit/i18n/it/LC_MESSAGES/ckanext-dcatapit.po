@@ -873,6 +873,9 @@ msgstr "Standards"
 msgid "Related Datasets"
 msgstr "Datasets Collegati"
 
+msgid "References"
+msgstr "Riferimenti"
+
 #: ckanext/dcatapit/templates/package/snippets/package_basic_fields.html:71
 msgid "Additional Info"
 msgstr "Informazioni supplementari"
