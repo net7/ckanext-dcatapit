@@ -1,57 +1,276 @@
 {% extends "organization/snippets/organization_form.html" %}
+{% import 'macros/form.html' as form %}
 
 {% set org_fields = h.get_dcatapit_organization_schema() %}
 
+{% block basic_fields %}
+  {# Campi standard CKAN (replicati dal core per poter sostituire il blocco immagine) #}
+  {% set attrs = {'data-module': 'slug-preview-target', 'class': 'form-control'} %}
+  {{ form.input('title', label=_('Name'), id='field-name',
+      placeholder=h.humanize_entity_type('organization', group_type, 'name placeholder') or _('My Organization'),
+      value=data.title, error=errors.title, classes=['control-full'], attrs=attrs) }}
+
+  {% set prefix = h.url_for(group_type + '.read', id='') %}
+  {% set domain = h.url_for(group_type + '.read', id='', qualified=true) %}
+  {% set domain = domain|replace("http://", "")|replace("https://", "") %}
+  {% set attrs = {'data-module': 'slug-preview-slug', 'class': 'form-control input-sm', 'data-module-prefix': domain, 'data-module-placeholder': '<' + group_type + '>'} %}
+  {{ form.prepend('name', label=_('URL'), prepend=prefix, id='field-url',
+      placeholder=_('my-' + group_type), value=data.name, error=errors.name,
+      attrs=attrs, is_required=true) }}
+
+  {{ form.markdown('description', label=_('Description'), id='field-description',
+      placeholder=h.humanize_entity_type('organization', group_type, 'description placeholder') or _('A little information about my organization...'),
+      value=data.description, error=errors.description) }}
+
+  {# === Sezione Logo Organizzazione === #}
+  {% set has_logo = data.image_url %}
+  {% set preview_url = data.image_url if (has_logo and data.image_url.startswith('http')) else ('/uploads/group/' + data.image_url if has_logo else '') %}
+
+  <style>
+  .logo-section-wrapper {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 16px;
+    background: #f9f9f9;
+  }
+  .logo-section-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    min-height: 88px;
+  }
+  .logo-preview-col {
+    flex: 0 0 80px;
+  }
+  .logo-preview-img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    display: block;
+  }
+  .logo-controls-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+  }
+  .logo-btn-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .logo-filename {
+    font-size: 12px;
+    color: #666;
+    word-break: break-all;
+    margin-bottom: 4px;
+  }
+  .logo-url-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 6px;
+  }
+  .logo-url-row input[type="text"] {
+    flex: 1;
+  }
+  </style>
+
+  <div class="control-group">
+    <label class="control-label" for="logo-section">
+      <strong>{{ _('Logo organizzazione') }}</strong>
+    </label>
+    <div class="controls" id="logo-section">
+      <div class="logo-section-wrapper">
+        <div class="logo-section-inner">
+
+          {# Colonna preview (visibile solo con logo) #}
+          <div class="logo-preview-col" id="logo-preview-col" {% if not has_logo %}style="display:none"{% endif %}>
+            <img id="logo-preview-img" src="{{ preview_url }}" class="logo-preview-img" alt="Logo">
+          </div>
+
+          {# Colonna controlli #}
+          <div class="logo-controls-col">
+
+            {# Stato: logo presente #}
+            <div id="logo-state-has-image" {% if not has_logo %}style="display:none"{% endif %}>
+              <div class="logo-filename" id="logo-filename">{{ data.image_url or '' }}</div>
+              <div class="logo-btn-row">
+                <button type="button" class="btn btn-default" id="logo-btn-change">
+                  <i class="fa fa-upload"></i> {{ _('Cambia logo') }}
+                </button>
+                <button type="button" class="btn btn-danger" id="logo-btn-remove">
+                  <i class="fa fa-trash"></i> {{ _('Rimuovi logo') }}
+                </button>
+              </div>
+            </div>
+
+            {# Stato: nessun logo #}
+            <div id="logo-state-no-image" {% if has_logo %}style="display:none"{% endif %}>
+              <div class="logo-btn-row">
+                <button type="button" class="btn btn-default" id="logo-btn-upload">
+                  <i class="fa fa-upload"></i> {{ _('Carica file') }}
+                </button>
+                <button type="button" class="btn btn-default" id="logo-btn-url">
+                  <i class="fa fa-link"></i> {{ _('Usa URL') }}
+                </button>
+              </div>
+              <div id="logo-url-input-row" class="logo-url-row" style="display:none">
+                <input type="text" id="logo-url-text" class="form-control"
+                       placeholder="http://example.com/logo.png" value="">
+                <button type="button" class="btn btn-default btn-sm" id="logo-btn-url-confirm">
+                  <i class="fa fa-check"></i>
+                </button>
+                <button type="button" class="btn btn-default btn-sm" id="logo-btn-url-cancel">
+                  <i class="fa fa-times"></i>
+                </button>
+              </div>
+            </div>
+
+          </div>{# /.logo-controls-col #}
+        </div>{# /.logo-section-inner #}
+      </div>{# /.logo-section-wrapper #}
+
+      {# Campi hidden richiesti da CKAN per il salvataggio #}
+      <input type="hidden" id="field-image-url" name="image_url" value="{{ data.image_url or '' }}">
+      <input type="file" id="field-image-upload" name="image_upload" style="display:none" accept="image/*">
+      <input type="hidden" id="field-clear-upload" name="clear_upload" value="">
+
+    </div>{# /.controls #}
+  </div>{# /.control-group #}
+{% endblock %}
+
+
 {% block custom_fields %}
-	{% snippet 'snippets/dcatapit_form_fields.html', data=data, errors=errors, schema_fields=org_fields %}
+  {% snippet 'snippets/dcatapit_form_fields.html', data=data, errors=errors, schema_fields=org_fields %}
 
-    {% if action == "new" or action == "edit" %}{{ super() }}{% endif %}
+  {% if action == "new" or action == "edit" %}{{ super() }}{% endif %}
 
-    <script>
-    (function() {
-      // Auto-populate url field based on name for organization
-      var nameField = document.getElementById('field-name');
-      var urlField = document.getElementById('field-url');
+  <script>
+  (function() {
+    var fileInput    = document.getElementById('field-image-upload');
+    var urlHidden    = document.getElementById('field-image-url');
+    var clearInput   = document.getElementById('field-clear-upload');
+    var previewImg   = document.getElementById('logo-preview-img');
+    var previewCol   = document.getElementById('logo-preview-col');
+    var filenameEl   = document.getElementById('logo-filename');
+    var stateHas     = document.getElementById('logo-state-has-image');
+    var stateNo      = document.getElementById('logo-state-no-image');
+    var urlInputRow  = document.getElementById('logo-url-input-row');
+    var urlText      = document.getElementById('logo-url-text');
 
-      if (nameField && urlField) {
-        nameField.addEventListener('input', function() {
-          // Solo se il campo url è vuoto o non è stato modificato manualmente
-          if (!urlField.dataset.manuallyEdited) {
-            var slug = nameField.value
-              .toLowerCase()
-              .trim()
-              .replace(/[àáâãäå]/g, 'a')
-              .replace(/[èéêë]/g, 'e')
-              .replace(/[ìíîï]/g, 'i')
-              .replace(/[òóôõö]/g, 'o')
-              .replace(/[ùúûü]/g, 'u')
-              .replace(/[ñ]/g, 'n')
-              .replace(/[ç]/g, 'c')
-              .replace(/[^\w\s-]/g, '') // Rimuove caratteri speciali
-              .replace(/\s+/g, '-')      // Sostituisce spazi con trattini
-              .replace(/-+/g, '-')       // Rimuove trattini multipli
-              .replace(/^-+|-+$/g, '');  // Rimuove trattini all'inizio e alla fine
-            
-            urlField.value = slug;
-            
-            // Trigger event
-            var event = new Event('input', { bubbles: true });
-            urlField.dispatchEvent(event);
-          }
-        });
-        
-        // Marca il campo come modificato manualmente se l'utente ci scrive dentro
-        urlField.addEventListener('keydown', function() {
-          urlField.dataset.manuallyEdited = 'true';
-        });
-        
-        // Resetta il flag se il campo viene svuotato
-        urlField.addEventListener('input', function() {
-          if (urlField.value === '') {
-            delete urlField.dataset.manuallyEdited;
-          }
-        });
+    function showHasImage(previewSrc, label) {
+      if (previewSrc) {
+        previewImg.src = previewSrc;
+        previewCol.style.display = '';
       }
-    })();
-    </script>
+      filenameEl.textContent = label || '';
+      stateHas.style.display = '';
+      stateNo.style.display  = 'none';
+    }
+
+    function showNoImage() {
+      stateHas.style.display  = 'none';
+      stateNo.style.display   = '';
+      previewCol.style.display = 'none';
+      urlInputRow.style.display = 'none';
+      urlText.value = '';
+    }
+
+    // Cambia logo: riapre il file picker mantenendo il logo corrente visibile fino alla scelta
+    document.getElementById('logo-btn-change').addEventListener('click', function() {
+      fileInput.click();
+    });
+
+    // Rimuovi logo
+    document.getElementById('logo-btn-remove').addEventListener('click', function() {
+      urlHidden.value  = '';
+      clearInput.value = 'true';
+      fileInput.value  = '';
+      showNoImage();
+    });
+
+    // Carica file (da stato "nessun logo")
+    document.getElementById('logo-btn-upload').addEventListener('click', function() {
+      fileInput.click();
+    });
+
+    // Mostra campo URL
+    document.getElementById('logo-btn-url').addEventListener('click', function() {
+      urlInputRow.style.display = '';
+      urlText.focus();
+    });
+
+    // Conferma URL
+    function confirmUrl() {
+      var url = urlText.value.trim();
+      if (url) {
+        urlHidden.value  = url;
+        clearInput.value = '';
+        fileInput.value  = '';
+        showHasImage(url, url);
+      }
+    }
+    document.getElementById('logo-btn-url-confirm').addEventListener('click', confirmUrl);
+    urlText.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); confirmUrl(); }
+    });
+
+    // Annulla URL
+    document.getElementById('logo-btn-url-cancel').addEventListener('click', function() {
+      urlInputRow.style.display = 'none';
+      urlText.value = '';
+    });
+
+    // Selezione file: mostra preview immediata via FileReader
+    fileInput.addEventListener('change', function() {
+      if (fileInput.files && fileInput.files[0]) {
+        var file = fileInput.files[0];
+        clearInput.value = '';
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          urlHidden.value = file.name;
+          showHasImage(e.target.result, file.name);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // === Auto-populate URL slug dal nome organizzazione ===
+    var nameField = document.getElementById('field-name');
+    var urlField  = document.getElementById('field-url');
+
+    if (nameField && urlField) {
+      nameField.addEventListener('input', function() {
+        if (!urlField.dataset.manuallyEdited) {
+          var slug = nameField.value
+            .toLowerCase().trim()
+            .replace(/[àáâãäå]/g, 'a')
+            .replace(/[èéêë]/g, 'e')
+            .replace(/[ìíîï]/g, 'i')
+            .replace(/[òóôõö]/g, 'o')
+            .replace(/[ùúûü]/g, 'u')
+            .replace(/[ñ]/g, 'n')
+            .replace(/[ç]/g, 'c')
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-+|-+$/g, '');
+          urlField.value = slug;
+          urlField.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      });
+      urlField.addEventListener('keydown', function() {
+        urlField.dataset.manuallyEdited = 'true';
+      });
+      urlField.addEventListener('input', function() {
+        if (urlField.value === '') delete urlField.dataset.manuallyEdited;
+      });
+    }
+  })();
+  </script>
 {% endblock %}
