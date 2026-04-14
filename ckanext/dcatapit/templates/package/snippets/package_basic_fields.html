@@ -94,6 +94,73 @@
          data-module-form-container="#dataset-edit">
     </div>
     {% endif %}
+
+    <script>
+    $(document).ready(function() {
+        var nameField      = document.getElementById('field-name');
+        var orgSelect      = document.getElementById('field-organizations');
+        var identifierField = document.getElementById('field-identifier');
+
+        if (!identifierField) return;
+
+        // Se il campo è già valorizzato (edit), non sovrascrivere
+        var manuallyEdited = !!identifierField.value;
+
+        var orgIdentifier = '';
+
+        function buildIdentifier() {
+            var slug = nameField ? nameField.value.trim() : '';
+            var parts = [];
+            if (orgIdentifier) parts.push(orgIdentifier);
+            if (slug) parts.push(slug);
+            return parts.join(':');
+        }
+
+        function refreshIdentifier() {
+            if (manuallyEdited) return;
+            identifierField.value = buildIdentifier();
+        }
+
+        function fetchOrgIdentifier(orgId) {
+            if (!orgId) {
+                orgIdentifier = '';
+                refreshIdentifier();
+                return;
+            }
+            $.getJSON('/api/3/action/organization_show', { id: orgId, include_extras: true })
+                .done(function(data) {
+                    orgIdentifier = (data.result && data.result.identifier) || '';
+                    refreshIdentifier();
+                });
+        }
+
+        // Aggiorna quando cambia lo slug del dataset
+        if (nameField) {
+            $(nameField).on('input change', function() {
+                refreshIdentifier();
+            });
+        }
+
+        // Aggiorna quando cambia l'organizzazione (select2 usa l'evento change sul select nativo)
+        if (orgSelect) {
+            $(orgSelect).on('change', function() {
+                fetchOrgIdentifier($(this).val());
+            });
+            // Carica l'identifier dell'org già selezionata al caricamento pagina
+            if (orgSelect.value) {
+                fetchOrgIdentifier(orgSelect.value);
+            }
+        }
+
+        // Segna come modificato manualmente se l'utente scrive nell'identifier
+        $(identifierField).on('keydown', function() {
+            manuallyEdited = true;
+        }).on('input', function() {
+            if (!identifierField.value) manuallyEdited = false;
+        });
+    });
+    </script>
+
     {% endblock %}
 {% endblock %}
 
