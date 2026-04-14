@@ -96,66 +96,66 @@
     {% endif %}
 
     <script>
-    $(document).ready(function() {
-        var nameField      = document.getElementById('field-name');
-        var orgSelect      = document.getElementById('field-organizations');
+    document.addEventListener('DOMContentLoaded', function() {
+        var titleField      = document.getElementById('field-title');
+        var orgSelect       = document.getElementById('field-organizations');
         var identifierField = document.getElementById('field-identifier');
 
         if (!identifierField) return;
 
         // Se il campo è già valorizzato (edit), non sovrascrivere
         var manuallyEdited = !!identifierField.value;
-
         var orgIdentifier = '';
 
-        function buildIdentifier() {
-            var slug = nameField ? nameField.value.trim() : '';
-            var parts = [];
-            if (orgIdentifier) parts.push(orgIdentifier);
-            if (slug) parts.push(slug);
-            return parts.join(':');
+        function slugify(text) {
+            return (text || '').toLowerCase().trim()
+                .replace(/[àáâãäå]/g, 'a')
+                .replace(/[èéêë]/g, 'e')
+                .replace(/[ìíîï]/g, 'i')
+                .replace(/[òóôõö]/g, 'o')
+                .replace(/[ùúûü]/g, 'u')
+                .replace(/[ñ]/g, 'n')
+                .replace(/[ç]/g, 'c')
+                .replace(/[^\w\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-+|-+$/g, '');
         }
 
         function refreshIdentifier() {
             if (manuallyEdited) return;
-            identifierField.value = buildIdentifier();
+            var slug = titleField ? slugify(titleField.value) : '';
+            var parts = [];
+            if (orgIdentifier) parts.push(orgIdentifier);
+            if (slug) parts.push(slug);
+            identifierField.value = parts.join(':');
         }
 
         function fetchOrgIdentifier(orgId) {
-            if (!orgId) {
-                orgIdentifier = '';
-                refreshIdentifier();
-                return;
-            }
-            $.getJSON('/api/3/action/organization_show', { id: orgId, include_extras: true })
-                .done(function(data) {
+            if (!orgId) { orgIdentifier = ''; refreshIdentifier(); return; }
+            fetch('/api/3/action/organization_show?id=' + encodeURIComponent(orgId) + '&include_extras=true')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
                     orgIdentifier = (data.result && data.result.identifier) || '';
                     refreshIdentifier();
                 });
         }
 
-        // Aggiorna quando cambia lo slug del dataset
-        if (nameField) {
-            $(nameField).on('input change', function() {
-                refreshIdentifier();
-            });
+        if (titleField) {
+            titleField.addEventListener('input', refreshIdentifier);
         }
 
-        // Aggiorna quando cambia l'organizzazione (select2 usa l'evento change sul select nativo)
         if (orgSelect) {
-            $(orgSelect).on('change', function() {
-                fetchOrgIdentifier($(this).val());
-            });
-            // Carica l'identifier dell'org già selezionata al caricamento pagina
-            if (orgSelect.value) {
+            orgSelect.addEventListener('change', function() {
                 fetchOrgIdentifier(orgSelect.value);
-            }
+            });
+            if (orgSelect.value) fetchOrgIdentifier(orgSelect.value);
         }
 
-        // Segna come modificato manualmente se l'utente scrive nell'identifier
-        $(identifierField).on('keydown', function() {
+        identifierField.addEventListener('keydown', function() {
             manuallyEdited = true;
-        }).on('input', function() {
+        });
+        identifierField.addEventListener('input', function() {
             if (!identifierField.value) manuallyEdited = false;
         });
     });
