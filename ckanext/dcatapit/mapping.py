@@ -1,7 +1,9 @@
 import json
 import logging
 import os
-from configparser import SafeConfigParser as ConfigParser
+# SafeConfigParser e' un alias deprecato di ConfigParser, rimosso in Python
+# 3.12+ (usato da ckan/ckan-dev:2.12.0).
+from configparser import ConfigParser
 
 from ckan.lib.base import config
 from ckan.model import Session

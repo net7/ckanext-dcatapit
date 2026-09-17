@@ -18,7 +18,9 @@ from ckan.model.meta import Session
 import ckan.plugins.toolkit as toolkit
 
 from ckanext.dcat.profiles import DCT
-from ckanext.dcat.profiles import namespaces as dcat_namespaces
+# "namespaces" non e' (piu') re-esportato da ckanext.dcat.profiles
+# (ckanext-dcat >= 2.x), solo dal sottomodulo .base.
+from ckanext.dcat.profiles.base import namespaces as dcat_namespaces
 
 from ckanext.dcatapit import interfaces
 from ckanext.dcatapit.commands import DataException, ConfigException

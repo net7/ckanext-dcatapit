@@ -22,7 +22,14 @@ def upgrade():
     op.execute('DROP INDEX IF EXISTS ix_dcatapit_vocabulary_text')
 
     # op.drop_constraint('dcatapit_subtheme_path_key', 'dcatapit_subtheme')
-    op.execute('ALTER TABLE dcatapit_subtheme DROP CONSTRAINT IF EXISTS dcatapit_subtheme_path_key')
+    # "IF EXISTS" copre solo il vincolo, non la tabella: su un'installazione
+    # nuova (tabelle create da ckanext.dcatapit.model.setup_db(), non da
+    # questa migrazione) "dcatapit_subtheme" non esiste ancora a questo punto
+    # e l'ALTER TABLE fallirebbe comunque con UndefinedTable. Non c'e' nulla
+    # da migrare in quel caso: la tabella verra' creata gia' nello schema
+    # corretto (senza il vincolo) da setup_db().
+    if sa.inspect(op.get_bind()).has_table('dcatapit_subtheme'):
+        op.execute('ALTER TABLE dcatapit_subtheme DROP CONSTRAINT IF EXISTS dcatapit_subtheme_path_key')
 
 
 def downgrade():

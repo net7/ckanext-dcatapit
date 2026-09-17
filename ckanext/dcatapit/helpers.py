@@ -5,7 +5,7 @@ import logging
 import ckan.lib.helpers as h
 import ckan.plugins.toolkit as toolkit
 from ckan.lib.base import config
-from ckan.model import GroupExtra, Session
+from ckan.model import Group, Session
 from ckan.plugins import PluginImplementations
 from ckanext.harvest.model import HarvestObject
 from markupsafe import Markup
@@ -326,22 +326,22 @@ def get_organization_by_identifier(context, identifier):
     quick'n'dirty way to get organization by rights holder's identifer
     from dcat rdf.
     """
+    # CKAN >= 2.10 non ha piu' una tabella group_extra separata: gli extra
+    # sono un dict JSONB sulla colonna Group.extras.
     try:
-        ge = Session.query(GroupExtra).filter_by(key='identifier',
-                                                 value=identifier,
-                                                 state='active')\
-            .one()
+        group = Session.query(Group).filter(
+            Group.extras['identifier'].astext == identifier,
+            Group.state == 'active',
+        ).one()
     except MultipleResultsFound:
         raise
     except NoResultFound:
-        ge = None
-    if ge:
-        # safety check
-        assert ge.group_id is not None
+        group = None
+    if group:
         ctx = context.copy()
         ctx.update(get_org_context())
 
-        return toolkit.get_action('organization_show')(context=ctx, data_dict={'id': ge.group_id})
+        return toolkit.get_action('organization_show')(context=ctx, data_dict={'id': group.id})
 
 
 def get_enable_form_tabs():

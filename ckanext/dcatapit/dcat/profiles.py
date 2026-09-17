@@ -17,10 +17,11 @@ from ckanext.dcat.profiles import (
     LOCN,
     OWL,
     SCHEMA,
-    TIME,
     VCARD,
     RDFProfile,
 )
+# TIME non e' (piu') re-esportato da ckanext.dcat.profiles (ckanext-dcat >= 2.x)
+from ckanext.dcat.profiles.base import TIME
 from ckanext.dcat.utils import catalog_uri, dataset_uri, resource_uri
 
 import ckanext.dcatapit.helpers as helpers

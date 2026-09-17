@@ -1,6 +1,10 @@
 # this is a namespace package
 import logging
 
+from sqlalchemy import inspect
+
+from ckan.model import meta
+
 from ckanext.dcatapit.model.license import License, LocalizedLicenseName
 
 from ckanext.dcatapit.model.subtheme import ThemeToSubtheme, Subtheme, SubthemeLabel
@@ -26,18 +30,18 @@ def setup_vocabulary_models():
     created = False
 
     # Setting up tag multilang table
-    if dcatapit_vocabulary_table.exists():
+    if inspect(meta.engine).has_table(dcatapit_vocabulary_table.name):
         log.debug(f'DCATAPIT: table {dcatapit_vocabulary_table.name} already exists')
     else:
         try:
             log.info(f'DCATAPIT: creating table {dcatapit_vocabulary_table.name}')
-            dcatapit_vocabulary_table.create()
+            dcatapit_vocabulary_table.create(bind=meta.engine)
             created = True
         except Exception as err:
             # Make sure the table does not remain incorrectly created
-            if dcatapit_vocabulary_table.exists():
-                dcatapit_vocabulary_table.Session.execute('DROP TABLE dcatapit_vocabulary')
-                dcatapit_vocabulary_table.Session.commit()
+            if inspect(meta.engine).has_table(dcatapit_vocabulary_table.name):
+                meta.Session.execute('DROP TABLE dcatapit_vocabulary')
+                meta.Session.commit()
             raise err
 
         log.debug('DCATAPIT Tag Vocabulary table created')
@@ -51,9 +55,9 @@ def setup_subtheme_models():
               SubthemeLabel.__table__,
               ThemeToSubtheme.__table__,
               ):
-        if not t.exists():
+        if not inspect(meta.engine).has_table(t.name):
             log.info(f'DCATAPIT: creating table {t.name}')
-            t.create()
+            t.create(bind=meta.engine)
             created = True
         else:
             log.debug(f'DCATAPIT: table {t.name} already exists')
@@ -66,9 +70,9 @@ def setup_license_models():
     for t in (License.__table__,
               LocalizedLicenseName.__table__,
               ):
-        if not t.exists():
+        if not inspect(meta.engine).has_table(t.name):
             log.info(f'DCATAPIT: creating table {t.name}')
-            t.create()
+            t.create(bind=meta.engine)
             created = True
         else:
             log.debug(f'DCATAPIT: table {t.name} already exists')

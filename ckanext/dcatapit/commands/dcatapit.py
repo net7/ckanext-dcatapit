@@ -2,8 +2,6 @@
 import click
 import logging
 
-import ckanext.dcatapit.commands.migrate110 as migrate110
-import ckanext.dcatapit.commands.migrate200 as migrate200
 from ckanext.dcatapit.commands.vocabulary import load_from_file as load_voc
 
 log = logging.getLogger(__name__)
@@ -37,6 +35,11 @@ def initdb():
 @click.option('-s', '--skip-orgs', is_flag=True,
               help='Skip organizations in data migration')
 def migrate_110(offset, limit, skip_orgs=False):
+    # Import lazy: migrate110 usa GroupExtra/PackageExtra, rimossi da CKAN
+    # 2.10+ e mai portati (comando storico, per dati pre-1.1.0 che qui non
+    # esistono). Import a livello di modulo bloccherebbe il caricamento del
+    # plugin anche per chi non usa mai questo comando.
+    import ckanext.dcatapit.commands.migrate110 as migrate110
     migrate110.do_migrate_data(limit=limit, offset=offset, skip_orgs=skip_orgs)
 
 
@@ -44,6 +47,8 @@ def migrate_110(offset, limit, skip_orgs=False):
 @click.option('-f', '--fix-old', is_flag=True, default=False,
               help='Try and fix datasets in older 1.0.0 format')
 def migrate_200(fix_old):
+    # Import lazy: stesso motivo di migrate_110 sopra.
+    import ckanext.dcatapit.commands.migrate200 as migrate200
     migrate200.migrate(fix_old)
 
 

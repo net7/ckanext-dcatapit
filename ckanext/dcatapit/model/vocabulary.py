@@ -80,4 +80,7 @@ class TagLocalization(DomainObject):
         return tags
 
 
-meta.mapper(TagLocalization, dcatapit_vocabulary_table)
+# meta.mapper() (SQLAlchemy 1.x) e' stato rimosso in SQLAlchemy 2.0, usato
+# da CKAN 2.10+: sostituito dal mapping imperativo equivalente, stesso
+# pattern usato dal core CKAN (vedi ckan/model/tag.py).
+meta.registry.map_imperatively(TagLocalization, dcatapit_vocabulary_table)
