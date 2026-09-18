@@ -6,7 +6,6 @@ from ckan.common import _, config
 from ckan.lib.i18n import get_locales
 from ckan.logic.validators import url_validator
 from ckan.plugins.toolkit import Invalid
-from sqlalchemy import and_
 
 from ckanext.dcatapit.mapping import themes_to_aggr_json, themes_parse_to_uris
 from ckanext.dcatapit.model.subtheme import Subtheme
@@ -41,29 +40,20 @@ def dcatapit_id_unique(value, context):
     model = context['model']
     session = context['session']
 
+    # model.PackageExtra (SQLAlchemy 1.x) e' stato rimosso in CKAN 2.10+:
+    # gli extras sono ora una colonna JSONB direttamente su Package
+    # (model.Package.extras), niente piu' tabella/join separati.
     package = context.get('package', None)
-    if package:
-        package_id = package.id
+    query = session.query(model.Package.id)\
+                    .filter(model.Package.type == 'dataset',
+                            model.Package.state == 'active',
+                            model.Package.extras['identifier'].astext == value)
 
+    if package:
         # existing dataset, exclude current one from search
-        result = session.query(model.PackageExtra)\
-                        .join(model.Package, and_(model.PackageExtra.package_id == model.Package.id,
-                                                  model.Package.type == 'dataset',
-                                                  model.Package.state == 'active'))\
-                        .filter(model.PackageExtra.package_id != package_id,
-                                model.PackageExtra.key == 'identifier',
-                                model.PackageExtra.value == value)\
-                        .first()
-    else:
-        # no package in context, so this is new dataset, no exclude here
-        # just search among live datasets
-        result = session.query(model.PackageExtra)\
-                        .join(model.Package, and_(model.PackageExtra.package_id == model.Package.id,
-                                                  model.Package.type == 'dataset',
-                                                  model.Package.state == 'active'))\
-                        .filter(model.PackageExtra.key == 'identifier',
-                                model.PackageExtra.value == value)\
-                        .first()
+        query = query.filter(model.Package.id != package.id)
+
+    result = query.first()
 
     if result is not None:
         raise Invalid(_('Another package exists with the same identifier'))

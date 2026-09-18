@@ -181,7 +181,13 @@ def do_load(g, vocab_name: str):
             cnt.incr('tag_skipped')
             continue
 
-        tag = model.Tag.by_name(tag_name, vocab)
+        # model.Tag.by_name(name, autoflush, for_update, vocab): "vocab" e'
+        # il QUARTO parametro (keyword-only in pratica), non il secondo -
+        # passarlo posizionale lo lega ad "autoflush" e la ricerca ricade
+        # sempre sui soli tag liberi (nessuna vocabulary_id), quindi non
+        # trova mai il tag appena creato e ad ogni ricarica tenta di
+        # reinserirlo (IntegrityError su vincolo di unicita').
+        tag = model.Tag.by_name(tag_name, vocab=vocab)
         if tag is None:
             log.info(f"Adding tag {vocab_name}::{tag_name}")
             tag = model.Tag(name=tag_name, vocabulary_id=vocab.id)
