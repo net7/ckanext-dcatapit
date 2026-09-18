@@ -827,8 +827,13 @@ class ItalianDCATAPProfile(RDFProfile):
 
         dataset_is_local = dataset_dict.get('dataset_is_local')
         if dataset_is_local:
+            # get_for_group_or_organization() ritorna None se ckanext-multilang
+            # non e' installata (comportamento documentato nel suo stesso
+            # docstring) - qui era l'unico punto in questo file a non
+            # gestirlo (gli altri tre usi passano tutti per
+            # _add_multilang_values(), che gia' controlla "if loc_dict:").
             _org_name = interfaces.get_for_group_or_organization(dataset_dict['owner_org'])
-            if _org_name.get('title'):
+            if _org_name and _org_name.get('title'):
                 loc_dict['holder_name'] = _org_name['title']
 
         # rights holder should use special trick to avoid duplicated foaf:name entries
