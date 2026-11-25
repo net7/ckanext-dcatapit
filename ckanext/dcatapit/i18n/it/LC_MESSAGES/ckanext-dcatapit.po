@@ -578,7 +578,7 @@ msgstr ""
 #: ckanext/dcatapit/validators.py:381 ckanext/dcatapit/validators.py:403
 #: ckanext/dcatapit/validators.py:412
 msgid "Theme data should not be empty"
-msgstr "Tema - errore interno dati vuoti"
+msgstr "Tema: selezionare almeno un tema nella scheda Classificazioni"
 
 #: ckanext/dcatapit/validators.py:392
 msgid "Theme data is not valid, expected json, got {}"
